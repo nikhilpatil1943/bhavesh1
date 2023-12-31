@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   HomeOutlined,
   BookOutlined,
@@ -28,6 +29,7 @@ const items = [
 ];
 
 const BasicLayout = () => {
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(true);
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -46,10 +48,17 @@ const BasicLayout = () => {
     window.addEventListener('resize', handleResize);
     handleResize(); // Initial check on mount
 
+    // Check for user token in local storage
+    const userToken = localStorage.getItem('token');
+    if (!userToken) {
+      // Redirect to sign-in page if token is not present
+      navigate('/signin');
+    }
+
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>

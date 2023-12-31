@@ -23,7 +23,7 @@ const userLogin = async (req, res) => {
 
     const jsonKey = process.env.JSONTOKEN;
     const token = jwt.sign(
-      { phone: existingUser.phone, id: existingUser._id },
+      { username: existingUser.username, id: existingUser._id },
       jsonKey,
       { expiresIn: "24h" }
     );
@@ -35,4 +35,4 @@ const userLogin = async (req, res) => {
       .json({ message: "Something went worng, try agin later" });
   }
 };
-export default userLogin;
+export default userLogin;

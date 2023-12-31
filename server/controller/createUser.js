@@ -30,7 +30,7 @@ const userCreate = async (req, res) => {
     });
 
     const jsonKey = process.env.JSONTOKEN;
-    const token = jwt.sign({ phone: result.phone, id: result._id }, jsonKey, {
+    const token = jwt.sign({ email: result.email, id: result._id }, jsonKey, {
       expiresIn: "720h",
     });
 
@@ -47,4 +47,4 @@ const userCreate = async (req, res) => {
       .json({ message: "Something went wrong, Please try later" });
   }
 };
-export default userCreate;
+export default userCreate;

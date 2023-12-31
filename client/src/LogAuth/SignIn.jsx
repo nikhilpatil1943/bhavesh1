@@ -2,16 +2,29 @@ import React from 'react';
 import { Form, Input, Button, Checkbox, message } from 'antd';
 import './Log.css';
 import Typography from 'antd/es/typography/Typography';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';  // Import useNavigate
 import axios from 'axios';
+import Home from '../pages/Home';
 
 const SignIn = () => {
+  const navigate = useNavigate();  // Initialize useNavigate hook
+
   const onFinish = async (values) => {
     try {
       const response = await axios.post('http://localhost:5000/suser/login', values);
       console.log('API Response:', response.data);
+
+      // Extract the token from the API response
+      const token = response.data.token;
+
+      // Save the token to local storage
+      localStorage.setItem('token', token);
+
       // Add logic to handle successful sign-in
       message.success('Sign-in successful!');
+
+      // Redirect to the Home page
+      navigate('/');
     } catch (error) {
       console.error('API Error:', error.message);
       // Add logic to handle sign-in error

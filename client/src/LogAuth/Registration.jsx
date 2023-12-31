@@ -1,18 +1,37 @@
 import React from 'react';
 import { Form, Input, Button, Checkbox, message } from 'antd';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Registration = () => {
+  const history = useNavigate();
+
   const onFinish = async (values) => {
     try {
       const response = await axios.post('http://localhost:5000/suser/register', values);
       console.log('API Response:', response.data);
+
+      // Extract the token from the API response
+      const token = response.data.token;
+
+      // Save the token to local storage
+      localStorage.setItem('token', token);
+
       // Add logic to handle successful registration
-      message.success('Registration successful!');
+      message.success('Registration successful! Redirecting to Sign In page.');
+
+      // Redirect to SignIn page
+      history('/signin');
     } catch (error) {
-      console.error('API Error:', error.message);
-      // Add logic to handle registration error
-      message.error('Registration failed. Please try again.');
+      console.error('API Error:', error.response.data.message);
+
+      // Check if the error response indicates that the user already exists
+      if (error.response && error.response.data && error.response.data.message === 'User already exists') {
+        message.error('User already exists. Please sign in or use a different username/email.');
+      } else {
+        // Add logic to handle other registration errors
+        message.error(`${error.response.data.message}`);
+      }
     }
   };
 
@@ -21,9 +40,9 @@ const Registration = () => {
   };
 
   return (
-    <div className='lgbg' style={{display:'flex', height:'100vh'}}>
+    <div className='lgbg' style={{ display: 'flex', height: '100vh' }}>
       <div className='formbox '>
-        <h1 className="Title"style={{ textAlign: 'center', marginBottom: '20px' , marginTop:'0px'}}>Register</h1>
+        <h1 className="Title" style={{ textAlign: 'center', marginBottom: '20px', marginTop: '0px' }}>Register</h1>
         <Form
           name="registration"
           onFinish={onFinish}
