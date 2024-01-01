@@ -30,7 +30,7 @@ function getItem(label, key, icon, children) {
 const items = [
   getItem('Home', 'home', <HomeOutlined />),
   getItem('Bookmarks', '2', <BookOutlined />),
-  getItem('Likes', 'sub1', <LikeOutlined />),
+  getItem('Likes', 'my-likes', <LikeOutlined />),
   getItem('Posts', 'sub2', <ProfileOutlined />),
   getItem('User', '9', <UserOutlined />),
 ];
@@ -70,7 +70,7 @@ const BasicLayout = () => {
     navigate(`/${key}`);
   };
 
-  // Handle Home button click
+  // Handle Home button click 
   const handleHomeClick = () => {
     navigate('/home'); // Redirect to the home page
   };
@@ -92,13 +92,16 @@ const BasicLayout = () => {
         <div className="demo-logo-vertical" />
         <Menu
           theme="dark"
-          defaultSelectedKeys={['home']}
+          defaultSelectedKeys={[]}
           mode="inline"
           items={items}
           onClick={handleMenuClick}
         >
           <Menu.Item key="home" icon={<HomeOutlined />} onClick={handleHomeClick}>
             Home
+          </Menu.Item>
+          <Menu.Item key="my-likes" icon={<LikeOutlined />} onClick={handleHomeClick}>
+            MyLikes
           </Menu.Item>
           {/* Other menu items... */}
         </Menu>
