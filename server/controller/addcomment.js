@@ -3,7 +3,7 @@ import Post from "../models/postSchema.js";
 const addComment = async (req, res) => {
   try {
     const { _id, comment } = req.body;
-    const username = req.userId; // Assuming req.userId contains the username after authentication
+    const username = req.username; // Assuming req.userId contains the username after authentication
 
     if (!_id || !comment || !username) {
       return res.status(400).json({ message: "Please provide post _id, comment, and username" });

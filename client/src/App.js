@@ -18,20 +18,13 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/registration" element={<Registration />} />
 
-
-
-          <Route
-            path="/*"
-            element={
-              <BasicLayout>
-                <Route index element={<Home />} />
-                <Route path="/my-likes" element={<MyLikes />} />
-                <Route path="/my-bookmarks" element={<MyBookmarks />} />
-                <Route path="/my-posts" element={<MyPosts />} />
-                <Route path="/my-profile" element={<MyProfile />} />
-              </BasicLayout>
-            }
-          />
+          {/* Place more specific routes first */}
+          <Route path="/" element={<BasicLayout/>}/>
+          <Route path="/home" element={<Home />}/>
+          <Route path="/my-likes" element={<MyLikes />} />
+          <Route path="/my-bookmarks" element={<MyBookmarks />} />
+          <Route path="/my-posts" element={<MyPosts />} />
+          <Route path="/my-profile" element={<MyProfile />}/>
         </Routes>
       </Router>
     </div>

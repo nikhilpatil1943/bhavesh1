@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 const authenticateUser = async (req, res, next) => {
     const authHeader = req.headers.authorization; // Assuming the token is sent in the 'Authorization' header
-  
+     console.log(authHeader)
     try {
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res.status(401).json({ message: "Unauthorized: Invalid token format" });

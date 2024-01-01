@@ -12,6 +12,7 @@ import likePost from "../controller/likepost.js";
 import getMyPosts from "../controller/getmypost.js";
 import addComment from "../controller/addcomment.js";
 import getUserLikedPosts from "../controller/getlikedpost.js";
+import getAllComments from "../controller/getcomments.js";
 
 router.post("/login", userLogin);
 router.post("/register", userCreate);
@@ -26,6 +27,7 @@ router.post("/addcomment",authenticateUser,addComment);
 router.get("/getallpost",getAllPosts);
 router.get("/getmypost",authenticateUser,getMyPosts);
 router.get("/getmylikedpost",authenticateUser,getUserLikedPosts);
+router.post("/getallcomments",getAllComments)
 
 
 

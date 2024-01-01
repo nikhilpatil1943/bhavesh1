@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   HomeOutlined,
   BookOutlined,
@@ -8,9 +8,15 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import Home from '../pages/Home';
+import MyLikes from '../pages/MyLikes';
+import MyPosts from '../pages/MyPosts';
+import MyProfile from '../pages/MyProfile';
+import MyBookmarks from '../pages/MyBookmarks';
 
 const { Header, Content, Footer, Sider } = Layout;
 
+// Function to create menu items
 function getItem(label, key, icon, children) {
   return {
     key,
@@ -20,8 +26,9 @@ function getItem(label, key, icon, children) {
   };
 }
 
+// Array of menu items
 const items = [
-  getItem('Home', '1', <HomeOutlined />),
+  getItem('Home', 'home', <HomeOutlined />),
   getItem('Bookmarks', '2', <BookOutlined />),
   getItem('Likes', 'sub1', <LikeOutlined />),
   getItem('Posts', 'sub2', <ProfileOutlined />),
@@ -29,6 +36,7 @@ const items = [
 ];
 
 const BasicLayout = () => {
+  
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(true);
   const {
@@ -38,7 +46,6 @@ const BasicLayout = () => {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 450) {
-        // Do not allow uncollapsing for screen widths less than 450
         setCollapsed(true);
       } else {
         setCollapsed(false);
@@ -46,19 +53,27 @@ const BasicLayout = () => {
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); // Initial check on mount
-
-    // Check for user token in local storage
+    handleResize();
     const userToken = localStorage.getItem('token');
     if (!userToken) {
       // Redirect to sign-in page if token is not present
       navigate('/signin');
     }
-
     return () => {
       window.removeEventListener('resize', handleResize);
     };
   }, [navigate]);
+
+  // Handle menu item click
+  const handleMenuClick = (item) => {
+    const { key } = item;
+    navigate(`/${key}`);
+  };
+
+  // Handle Home button click
+  const handleHomeClick = () => {
+    navigate('/home'); // Redirect to the home page
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -67,19 +82,41 @@ const BasicLayout = () => {
         collapsed={collapsed}
         onCollapse={(value) => {
           if (window.innerWidth >= 450) {
-            // Allow collapsing and uncollapsing for screen widths greater than or equal to 450
             setCollapsed(value);
           }
         }}
-        breakpoint="lg" // Set the breakpoint for responsive behavior
-        collapsedWidth="80" // Width of the collapsed sidebar
-        zeroWidthTriggerStyle={{ top: 64 }} // Adjust trigger position
+        breakpoint="lg"
+        collapsedWidth="80"
+        zeroWidthTriggerStyle={{ top: 64 }}
       >
         <div className="demo-logo-vertical" />
-        <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items} />
+        <Menu
+          theme="dark"
+          defaultSelectedKeys={['home']}
+          mode="inline"
+          items={items}
+          onClick={handleMenuClick}
+        >
+          <Menu.Item key="home" icon={<HomeOutlined />} onClick={handleHomeClick}>
+            Home
+          </Menu.Item>
+          {/* Other menu items... */}
+        </Menu>
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer , textAlign: 'center' ,fontSize:'200%' , fontFamily:"'Signika Negative', sans-serif", color:'rgb(54, 3, 77)' , textShadow:'2px 1px #9966ff'}} >Algo_Bulls </Header>
+        <Header
+          style={{
+            padding: 0,
+            background: colorBgContainer,
+            textAlign: 'center',
+            fontSize: '200%',
+            fontFamily: "'Signika Negative', sans-serif",
+            color: 'rgb(54, 3, 77)',
+            textShadow: '2px 1px #9966ff',
+          }}
+        >
+          Algo_Bulls{' '}
+        </Header>
         <Content style={{ margin: '0 16px' }}>
           <Breadcrumb style={{ margin: '16px 0' }}>
             <Breadcrumb.Item>About</Breadcrumb.Item>
@@ -90,10 +127,9 @@ const BasicLayout = () => {
               minHeight: 360,
               background: colorBgContainer,
               borderRadius: borderRadiusLG,
-            }} 
-            
+            }}
           >
-            Bill is a cat.
+  
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
@@ -105,7 +141,3 @@ const BasicLayout = () => {
 };
 
 export default BasicLayout;
-
-
-
-
