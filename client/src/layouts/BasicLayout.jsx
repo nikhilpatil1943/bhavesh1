@@ -29,10 +29,10 @@ function getItem(label, key, icon, children) {
 // Array of menu items
 const items = [
   getItem('Home', 'home', <HomeOutlined />),
-  getItem('Bookmarks', '2', <BookOutlined />),
+  getItem('Bookmarks', 'my-bookmarks', <BookOutlined />),
   getItem('Likes', 'my-likes', <LikeOutlined />),
-  getItem('Posts', 'sub2', <ProfileOutlined />),
-  getItem('User', '9', <UserOutlined />),
+  getItem('Posts', 'my-posts', <ProfileOutlined />),
+  getItem('User', 'my-profile', <UserOutlined />),
 ];
 
 const BasicLayout = () => {
@@ -74,6 +74,19 @@ const BasicLayout = () => {
   const handleHomeClick = () => {
     navigate('/home'); // Redirect to the home page
   };
+  const handleLikeClick = () => {
+    navigate('/my-likes'); // Redirect to the home page
+  };
+  const handleBookmarkClick = () => {
+    navigate('/my-bookmarks'); // Redirect to the home page
+  };
+  const handlePostClick = () => {
+    navigate('/my-posts'); // Redirect to the home page
+  };
+
+  const handleProfileClick = () => {
+    navigate('/my-profile'); // Redirect to the home page
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -100,10 +113,19 @@ const BasicLayout = () => {
           <Menu.Item key="home" icon={<HomeOutlined />} onClick={handleHomeClick}>
             Home
           </Menu.Item>
-          <Menu.Item key="my-likes" icon={<LikeOutlined />} onClick={handleHomeClick}>
+          <Menu.Item key="my-likes" icon={<LikeOutlined />} onClick={handleLikeClick}>
             MyLikes
           </Menu.Item>
-          {/* Other menu items... */}
+          <Menu.Item key="my-bookmarks" icon={<LikeOutlined />} onClick={handleBookmarkClick}>
+            MyBookmarks
+          </Menu.Item>
+          <Menu.Item key="my-posts" icon={<LikeOutlined />} onClick={handlePostClick}>
+            MyBookmarks
+          </Menu.Item>
+          <Menu.Item key="my-profile" icon={<LikeOutlined />} onClick={handleProfileClick}>
+            MyProfile
+          </Menu.Item>
+          
         </Menu>
       </Sider>
       <Layout>

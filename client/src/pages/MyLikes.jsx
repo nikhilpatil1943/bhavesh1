@@ -34,14 +34,14 @@ function getItem(label, key, icon, children) {
 }
 
 const items = [
-  getItem('Home', '1', <HomeOutlined />),
+  getItem('Home', 'home', <HomeOutlined />),
   getItem('Bookmarks', '2', <BookOutlined />),
-  getItem('Likes', 'sub1', <LikeOutlined />),
+  getItem('Likes', 'my-likes', <LikeOutlined />),
   getItem('Posts', 'sub2', <ProfileOutlined />),
   getItem('User', '9', <UserOutlined />),
 ];
 
-const Home = () => {
+const MyLikes = () => {
   const [collapsed, setCollapsed] = useState(true);
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -271,7 +271,7 @@ const fetchPosts = async (page) => {
         }}
       >
         <div className="demo-logo-vertical" />
-        <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items} />
+        <Menu theme="dark" defaultSelectedKeys={['my-likes']} mode="inline" items={items} />
       </Sider>
       <Layout style={{ marginLeft: collapsed ? 80 : 200 }}>
         <Header
@@ -374,4 +374,4 @@ const fetchPosts = async (page) => {
   );
 };
 
-export default Home;
+export default MyLikes;
