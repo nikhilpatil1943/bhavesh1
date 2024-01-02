@@ -19,7 +19,7 @@ function App() {
           <Route path="/registration" element={<Registration />} />
 
           {/* Place more specific routes first */}
-          <Route path="/" element={<Home/>}/>
+          <Route path="/" element={<BasicLayout/>}/>
           <Route path="/home" element={<Home />}/>
           <Route path="/my-likes" element={<MyLikes />} />
           <Route path="/my-bookmarks" element={<MyBookmarks />} />

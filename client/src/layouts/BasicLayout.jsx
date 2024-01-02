@@ -42,7 +42,7 @@ const items = [
   getItem('User', 'my-profile', <UserOutlined />),
 ];
 
-const Home = () => {
+const BasicLayout = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(true);
   const {
@@ -65,6 +65,16 @@ const Home = () => {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  // Check for the presence of the token during component initialization
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      // If token is not available, navigate to the sign-in page
+      navigate('/signin');
+    }
+  }, [navigate]);
 
   const [newComment, setNewComment] = useState('');
   const [posts, setPosts] = useState([]);
@@ -440,4 +450,4 @@ const fetchPosts = async (page) => {
   );
 };
 
-export default Home;
+export default BasicLayout;
