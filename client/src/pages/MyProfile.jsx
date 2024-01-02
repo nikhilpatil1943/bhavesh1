@@ -72,7 +72,7 @@ const MyProfile = () => {
           return;
         }
 
-        const response = await fetch('http://localhost:5000/suser/getmyprofile', {
+        const response = await fetch('/suser/getmyprofile', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${userToken}`,
@@ -115,7 +115,7 @@ const MyProfile = () => {
         return;
       }
   
-      const response = await fetch('http://localhost:5000/suser/updateprofile', {
+      const response = await fetch('/suser/updateprofile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

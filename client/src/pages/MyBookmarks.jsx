@@ -76,7 +76,7 @@ const MyBookmarks = () => {
       // Assuming you have the token stored in localStorage or some other way
       const token = localStorage.getItem('token');
   
-      const response = await fetch('http://localhost:5000/suser/likepost', {
+      const response = await fetch('/suser/likepost', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ const MyBookmarks = () => {
     try {
       const token = localStorage.getItem('token');
   
-      const response = await fetch('http://localhost:5000/suser/addcomment', {
+      const response = await fetch('/suser/addcomment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ const MyBookmarks = () => {
         const data = await response.json();
   
         // Fetch all comments for the post after adding a new comment
-        const commentsResponse = await fetch('http://localhost:5000/suser/getallcomments', {
+        const commentsResponse = await fetch('/suser/getallcomments', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ const MyBookmarks = () => {
 
 const toggleComments = async (postId) => {
   try {
-    const response = await fetch('http://localhost:5000/suser/getallcomments', {
+    const response = await fetch('/suser/getallcomments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -209,7 +209,7 @@ const fetchPosts = async (page) => {
   try {
     const token = localStorage.getItem('token');
 
-    const response = await fetch(`http://localhost:5000/suser/getmybookmarks`,{
+    const response = await fetch(`/suser/getmybookmarks`,{
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

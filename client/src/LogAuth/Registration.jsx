@@ -8,7 +8,7 @@ const Registration = () => {
 
   const onFinish = async (values) => {
     try {
-      const response = await axios.post('http://localhost:5000/suser/register', values);
+      const response = await axios.post('/suser/register', values);
       
       console.log('API Response:', response.data);
 

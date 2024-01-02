@@ -11,7 +11,7 @@ const SignIn = () => {
 
   const onFinish = async (values) => {
     try {
-      const response = await axios.post('http://localhost:5000/suser/login', values);
+      const response = await axios.post('/suser/login', values);
       console.log('API Response:', response.data);
 
       // Extract the token from the API response

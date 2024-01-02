@@ -61,7 +61,7 @@ const MyPosts = () => {
       try {
         const token = localStorage.getItem('token');
         // Make a request to the API
-        const response = await fetch('http://localhost:5000/suser/getmypost',{
+        const response = await fetch('/suser/getmypost',{
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ console.log(data)
       const token = localStorage.getItem('token');
 
       // Make a request to the API to create a new post
-      const response = await fetch('http://localhost:5000/suser/createpost', {
+      const response = await fetch('/suser/createpost', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ console.log(data)
       const token = localStorage.getItem('token');
 
       // Make a request to the API to update the post
-      const response = await fetch('http://localhost:5000/suser/updatepost', {
+      const response = await fetch('/suser/updatepost', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -222,7 +222,7 @@ console.log(data)
       const token = localStorage.getItem('token');
 
       // Make a request to the API to delete the post
-      const response = await fetch('http://localhost:5000/suser/deletePost', {
+      const response = await fetch('/suser/deletePost', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
