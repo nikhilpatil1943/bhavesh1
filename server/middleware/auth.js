@@ -17,10 +17,11 @@ const authenticateUser = async (req, res, next) => {
       req.username = decodedToken.username;// Attaching the user ID to the request object
       next(); // Proceed to the next middleware or route handler
     } catch (error) {
+      console.log(error)
       if (error.name === "JsonWebTokenError") {
         return res.status(401).json({ message: "Invalid token" });
       }
-      return res.status(500).json({ message: "Internal Server Error" });
+      return res.status(500).json({ message: "this is Internal Server Error" });
     }
   };
   

@@ -124,6 +124,58 @@ console.log(data)
       )
     );
   };
+  const handleCreatePost = async (values) => {
+    try {
+      const token = localStorage.getItem('token');
+
+      // Make a request to the API to create a new post
+      const response = await fetch('http://localhost:5000/suser/createpost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          heading: values.heading,  // Include heading in the request
+          body: values.content,        // Include body in the request
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update the state with the newly created post
+        setPosts((prevPosts) => [
+          {
+            id: data.post._id,
+            owner: {
+              name: 'Your Name',
+              photo: 'https://xsgames.co/randomusers/avatar.php?g=pixel&key=new',
+            },
+            date: 'Just now',
+            heading: values.heading,  // Set heading in the state
+            body: values.body,        // Set body in the state
+            likes: 0,
+            bookmarks: 0,
+            comments: [],
+            showComments: false,
+            isEditing: false,
+          },
+          ...prevPosts,
+        ]
+        );
+        window.location.reload();
+
+      } else {
+        console.error('Error creating post:', data.message);
+        // Handle error if needed
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+      // Handle error if needed
+    }
+  };
+  
 
   
 
@@ -224,7 +276,7 @@ console.log(data)
   };
 
   const isSmallScreen = window.innerWidth < 500;
-
+  const user_name1 = localStorage.getItem('username');
   const cardContent = (
     <>
       <List
@@ -312,16 +364,20 @@ console.log(data)
       >
         <Meta
           avatar={<Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=new" />}
-          title="Your Name"
+          title={`${user_name1}`}
           description="Just now"
         />
         <Form
           name="newPostForm"
           initialValues={{ content: '' }}
-          onFinish={(values) => {
-            setPosts(/* ... */);
-          }}
+          onFinish={handleCreatePost}
         >
+          <Form.Item
+            name="heading"
+            rules={[{ required: true, message: 'Heading is required' }]}
+          >
+            <Input placeholder="Enter heading" />
+          </Form.Item>
           <Form.Item
             name="content"
             rules={[{ required: true, message: 'Content is required' }]}

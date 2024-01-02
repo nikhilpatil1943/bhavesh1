@@ -3,7 +3,9 @@ import Post from "../models/postSchema.js";
 const createPost = async (req, res) => {
   try {
     const { heading, body } = req.body;
-    const username = req.username; // Assuming req.userId contains the username after authentication
+    const username = req.username; 
+    console.log(username)
+    console.log(req.body)// Assuming req.userId contains the username after authentication
 
     if (!heading || !body || !username) {
       return res.status(400).json({ message: "Please provide heading, body, and username" });

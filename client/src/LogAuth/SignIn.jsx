@@ -16,9 +16,13 @@ const SignIn = () => {
 
       // Extract the token from the API response
       const token = response.data.token;
+      const username = response.data.result.username;
+
+      
 
       // Save the token to local storage
       localStorage.setItem('token', token);
+      localStorage.setItem('username',username)
 
       // Add logic to handle successful sign-in
       message.success('Sign-in successful!');
