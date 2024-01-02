@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+
 import {
   HomeOutlined,
   BookOutlined,
@@ -7,16 +8,23 @@ import {
   ProfileOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
-import Home from '../pages/Home';
-import MyLikes from '../pages/MyLikes';
-import MyPosts from '../pages/MyPosts';
-import MyProfile from '../pages/MyProfile';
-import MyBookmarks from '../pages/MyBookmarks';
+import {
+  Breadcrumb,
+  Layout,
+  Menu,
+  theme,
+  Card,
+  Input,
+  Button,
+  Tooltip,
+  List,
+} from 'antd';
+import { Comment as AntComment } from '@ant-design/compatible';
+import { LikeTwoTone, BookTwoTone, CommentOutlined } from '@ant-design/icons';
 
 const { Header, Content, Footer, Sider } = Layout;
+const { Meta } = Card;
 
-// Function to create menu items
 function getItem(label, key, icon, children) {
   return {
     key,
@@ -26,7 +34,6 @@ function getItem(label, key, icon, children) {
   };
 }
 
-// Array of menu items
 const items = [
   getItem('Home', 'home', <HomeOutlined />),
   getItem('Bookmarks', 'my-bookmarks', <BookOutlined />),
@@ -35,8 +42,7 @@ const items = [
   getItem('User', 'my-profile', <UserOutlined />),
 ];
 
-const BasicLayout = () => {
-  
+const Home = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(true);
   const {
@@ -54,17 +60,215 @@ const BasicLayout = () => {
 
     window.addEventListener('resize', handleResize);
     handleResize();
-    const userToken = localStorage.getItem('token');
-    if (!userToken) {
-      // Redirect to sign-in page if token is not present
-      navigate('/signin');
-    }
+
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [navigate]);
+  }, []);
 
-  // Handle menu item click
+  const [newComment, setNewComment] = useState('');
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [commentCounts, setCommentCounts] = useState({});
+  const handleBookmark = async (postId) => {
+    try {
+      const token = localStorage.getItem('token');
+  
+      const response = await fetch('/suser/bookmarkpost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ _id: postId }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post._id === postId
+              ? {
+                  ...post,
+                  bookmarked: !post.bookmarked,
+                  bookmarks: data.bookmarks,
+                }
+              : post
+          )
+        );
+      } else {
+        console.error('Failed to bookmark/unbookmark the post');
+      }
+    } catch (error) {
+      console.error('Error bookmarking/unbookmarking the post:', error);
+    }
+  };
+  
+  const handleLike = async (postId) => {
+    try {
+      // Assuming you have the token stored in localStorage or some other way
+      const token = localStorage.getItem('token');
+  
+      const response = await fetch('/suser/likepost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ _id: postId }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post._id === postId
+              ? {
+                  ...post,
+                  liked: !post.liked,
+                  likes: data.likes,
+                }
+              : post
+          )
+        );
+      } else {
+        console.error('Failed to like the post');
+      }
+    } catch (error) {
+      console.error('Error liking the post:', error);
+    }
+  };
+  
+  const handleAddComment = async (postId) => {
+    try {
+      const token = localStorage.getItem('token');
+  
+      const response = await fetch('/suser/addcomment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ _id: postId, comment: newComment }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+  
+        // Fetch all comments for the post after adding a new comment
+        const commentsResponse = await fetch('/suser/getallcomments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ _id: postId }),
+        });
+  
+        if (commentsResponse.ok) {
+          const commentsData = await commentsResponse.json();
+  
+          // Update the state based on the previous state
+          setPosts((prevPosts) =>
+            prevPosts.map((post) =>
+              post._id === postId
+                ? {
+                    ...post,
+                    comments: commentsData.comments,
+                    showComments: true, // Assuming you want to show comments after adding a new one
+                  }
+                : post
+            )
+          );
+  
+          // Update commentCounts for the specific post
+          setCommentCounts((prevCounts) => ({
+            ...prevCounts,
+            [postId]: commentsData.comments.length,
+          }));
+        } else {
+          console.error(`Failed to fetch comments after adding a new comment. Status: ${commentsResponse.status}`);
+        }
+  
+        setNewComment('');
+      } else {
+        console.error(`Failed to add comment. Status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error adding comment:', error.message);
+    }
+  };
+  
+  
+  
+  
+  
+
+// ...
+
+const toggleComments = async (postId) => {
+  try {
+    const response = await fetch('/suser/getallcomments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ _id: postId }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === postId
+            ? { ...post, comments: data.comments, showComments: !post.showComments }
+            : post
+        )
+      );
+    } else {
+      console.error(`Failed to fetch comments. Status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error fetching comments:', error.message);
+  }
+};
+
+
+// ...
+
+
+const fetchPosts = async (page) => {
+  try {
+    const response = await fetch(`/suser/getallpost?page=${page}`);
+    const data = await response.json();
+
+    // Assuming that each post has a unique identifier _id
+    setPosts((prevPosts) => {
+      const uniquePosts = new Map(prevPosts.map((post) => [post._id, post]));
+
+      // Merge new posts with existing posts based on unique identifier (_id)
+      data.posts.forEach((newPost) => {
+        uniquePosts.set(newPost._id, newPost);
+      });
+
+      // Convert Map back to an array of posts
+      return Array.from(uniquePosts.values());
+    });
+
+    setLoading(false);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    setLoading(false);
+  }
+};
+  useEffect(() => {
+    setLoading(true);
+    fetchPosts(currentPage);
+  }, [currentPage]);
+
+  const handleCommentChange = (e) => {
+    setNewComment(e.target.value);
+  };
   const handleMenuClick = (item) => {
     const { key } = item;
     navigate(`/${key}`);
@@ -101,11 +305,17 @@ const BasicLayout = () => {
         breakpoint="lg"
         collapsedWidth="80"
         zeroWidthTriggerStyle={{ top: 64 }}
+        style={{
+          position: 'fixed',
+          height: '100vh',
+          left: 0,
+          zIndex: 1,
+        }}
       >
         <div className="demo-logo-vertical" />
         <Menu
           theme="dark"
-          defaultSelectedKeys={[]}
+          defaultSelectedKeys={['home']}
           mode="inline"
           items={items}
           onClick={handleMenuClick}
@@ -128,7 +338,7 @@ const BasicLayout = () => {
           
         </Menu>
       </Sider>
-      <Layout>
+      <Layout style={{ marginLeft: collapsed ? 80 : 200 }}>
         <Header
           style={{
             padding: 0,
@@ -143,26 +353,91 @@ const BasicLayout = () => {
           Algo_Bulls{' '}
         </Header>
         <Content style={{ margin: '0 16px' }}>
-          <Breadcrumb style={{ margin: '16px 0' }}>
-            <Breadcrumb.Item>About</Breadcrumb.Item>
-          </Breadcrumb>
-          <div
-            style={{
-              padding: 24,
-              minHeight: 360,
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
-            }}
-          >
-  
-          </div>
+          {posts.map((post) => (
+            <Card
+              key={post._id}
+              size="small"
+              style={{ marginBottom: '16px', marginTop: '10px' }}
+              actions={[
+                <Tooltip key="like" title={`Likes: ${post.likes.length}`}>
+                  <LikeTwoTone
+                    twoToneColor={post.liked ? '#eb2f96' : undefined}
+                    onClick={() => handleLike(post._id)}
+                  />
+                  <span style={{ paddingLeft: 8 }}>{post.likes.length}</span>
+                </Tooltip>,
+                <Tooltip key="bookmark" title="Bookmark">
+                  <BookTwoTone  onClick={() => handleBookmark(post._id)} />
+
+                  <span style={{ paddingLeft: 8 }}>{}</span>
+                </Tooltip>,
+                <Tooltip
+                  key="comment"
+                  title={post.showComments ? 'Hide Comments' : 'Show Comments'}
+                  onClick={() => toggleComments(post._id)}
+                >
+                  <CommentOutlined />
+                  <span style={{ paddingLeft: 8 }}>{post.comments ? post.comments.length : commentCounts}</span>
+
+                </Tooltip>,
+              ]}
+            >
+              <Meta
+      title={
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <img src={'https://img.freepik.com/free-photo/blue-wall-background_53876-88663.jpg'} alt="User" style={{ width: '30px', height: '30px', borderRadius: '50%', marginRight: '8px' }} />
+          <div>{post.heading}</div>
+        </div>
+      }
+      description={`${post.date} by ${post.username}`}
+    />
+              <p>{post.body}</p>
+              {post.showComments && (
+                <div>
+                  <List
+                    dataSource={post.comments}
+                    renderItem={(comment) => (
+                      <AntComment
+                        key={comment.username}
+                        author={comment.username}
+                        content={<p>{comment.comment}</p>}
+                      />
+                    )}
+                  />
+                  <div>
+                    <Input.TextArea
+                      rows={2}
+                      placeholder="Add a comment..."
+                      value={newComment}
+                      onChange={handleCommentChange}
+                    />
+                    <Button
+                      type="primary"
+                      style={{ marginTop: '8px' }}
+                      onClick={() => handleAddComment(post._id)}
+                    >
+                      Add Comment
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </Card>
+          ))}
+          {loading && <p>Loading...</p>}
+          {!loading && (
+            <Button
+              type="primary"
+              style={{ marginTop: '16px' }}
+              onClick={() => setCurrentPage((prevPage) => prevPage + 1)}
+            >
+              Load More
+            </Button>
+          )}
         </Content>
-        <Footer style={{ textAlign: 'center' }}>
-          Ant Design ©2023 Created by Ant UED
-        </Footer>
+        <Footer style={{ textAlign: 'center' }}>Ant Design ©2023 Created by Ant UED</Footer>
       </Layout>
     </Layout>
   );
 };
 
-export default BasicLayout;
+export default Home;

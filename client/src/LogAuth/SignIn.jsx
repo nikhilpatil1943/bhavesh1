@@ -28,7 +28,7 @@ const SignIn = () => {
       message.success('Sign-in successful!');
 
       // Redirect to the Home page
-      navigate('/');
+      navigate('/home');
     } catch (error) {
       console.error('API Error:', error.message);
       // Add logic to handle sign-in error
