@@ -40,6 +40,12 @@ const postSchema = new Schema({
       required: true,
     },
   ],
+  bookmarks: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
   comments: [commentSchema],
 });
 

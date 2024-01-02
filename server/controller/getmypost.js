@@ -2,7 +2,7 @@ import Post from "../models/postSchema.js";
 
 const getMyPosts = async (req, res) => {
   try {
-    const username = req.userId; // Assuming req.userId contains the username after authentication
+    const username = req.username; // Assuming req.userId contains the username after authentication
 
     if (!username) {
       return res.status(400).json({ message: "Username not found in middleware" });

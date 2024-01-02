@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
 import {
   HomeOutlined,
@@ -34,14 +35,15 @@ function getItem(label, key, icon, children) {
 }
 
 const items = [
-  getItem('Home', '1', <HomeOutlined />),
-  getItem('Bookmarks', '2', <BookOutlined />),
-  getItem('Likes', 'sub1', <LikeOutlined />),
-  getItem('Posts', 'sub2', <ProfileOutlined />),
-  getItem('User', '9', <UserOutlined />),
+  getItem('Home', 'home', <HomeOutlined />),
+  getItem('Bookmarks', 'my-bookmarks', <BookOutlined />),
+  getItem('Likes', 'my-likes', <LikeOutlined />),
+  getItem('Posts', 'my-posts', <ProfileOutlined />),
+  getItem('User', 'my-profile', <UserOutlined />),
 ];
 
 const Home = () => {
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(true);
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -69,6 +71,40 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [commentCounts, setCommentCounts] = useState({});
+  const handleBookmark = async (postId) => {
+    try {
+      const token = localStorage.getItem('token');
+  
+      const response = await fetch('http://localhost:5000/suser/bookmarkpost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ _id: postId }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post._id === postId
+              ? {
+                  ...post,
+                  bookmarked: !post.bookmarked,
+                  bookmarks: data.bookmarks,
+                }
+              : post
+          )
+        );
+      } else {
+        console.error('Failed to bookmark/unbookmark the post');
+      }
+    } catch (error) {
+      console.error('Error bookmarking/unbookmarking the post:', error);
+    }
+  };
+  
   const handleLike = async (postId) => {
     try {
       // Assuming you have the token stored in localStorage or some other way
@@ -233,6 +269,28 @@ const fetchPosts = async (page) => {
   const handleCommentChange = (e) => {
     setNewComment(e.target.value);
   };
+  const handleMenuClick = (item) => {
+    const { key } = item;
+    navigate(`/${key}`);
+  };
+
+  // Handle Home button click 
+  const handleHomeClick = () => {
+    navigate('/home'); // Redirect to the home page
+  };
+  const handleLikeClick = () => {
+    navigate('/my-likes'); // Redirect to the home page
+  };
+  const handleBookmarkClick = () => {
+    navigate('/my-bookmarks'); // Redirect to the home page
+  };
+  const handlePostClick = () => {
+    navigate('/my-posts'); // Redirect to the home page
+  };
+
+  const handleProfileClick = () => {
+    navigate('/my-profile'); // Redirect to the home page
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -255,7 +313,30 @@ const fetchPosts = async (page) => {
         }}
       >
         <div className="demo-logo-vertical" />
-        <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items} />
+        <Menu
+          theme="dark"
+          defaultSelectedKeys={['home']}
+          mode="inline"
+          items={items}
+          onClick={handleMenuClick}
+        >
+          <Menu.Item key="home" icon={<HomeOutlined />} onClick={handleHomeClick}>
+            Home
+          </Menu.Item>
+          <Menu.Item key="my-likes" icon={<LikeOutlined />} onClick={handleLikeClick}>
+            MyLikes
+          </Menu.Item>
+          <Menu.Item key="my-bookmarks" icon={<LikeOutlined />} onClick={handleBookmarkClick}>
+            MyBookmarks
+          </Menu.Item>
+          <Menu.Item key="my-posts" icon={<LikeOutlined />} onClick={handlePostClick}>
+            MyBookmarks
+          </Menu.Item>
+          <Menu.Item key="my-profile" icon={<LikeOutlined />} onClick={handleProfileClick}>
+            MyProfile
+          </Menu.Item>
+          
+        </Menu>
       </Sider>
       <Layout style={{ marginLeft: collapsed ? 80 : 200 }}>
         <Header
@@ -286,8 +367,9 @@ const fetchPosts = async (page) => {
                   <span style={{ paddingLeft: 8 }}>{post.likes.length}</span>
                 </Tooltip>,
                 <Tooltip key="bookmark" title="Bookmark">
-                  <BookTwoTone />
-                  <span style={{ paddingLeft: 8 }}>{post.bookmarks}</span>
+                  <BookTwoTone  onClick={() => handleBookmark(post._id)} />
+
+                  <span style={{ paddingLeft: 8 }}>{}</span>
                 </Tooltip>,
                 <Tooltip
                   key="comment"

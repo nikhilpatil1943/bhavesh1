@@ -2,7 +2,7 @@ import Post from "../models/postSchema.js";
 
 const deletePost = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.body;
 
     if (!id) {
       return res.status(400).json({ message: "Please provide post _id to delete" });

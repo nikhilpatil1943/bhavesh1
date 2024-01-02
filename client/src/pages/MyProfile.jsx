@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   HomeOutlined,
   BookOutlined,
@@ -7,18 +7,13 @@ import {
   ProfileOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { Avatar, Form, Input, Button } from 'antd';
-import {  MailOutlined, PhoneOutlined } from '@ant-design/icons';
+import { Avatar, Form, Input, Button, Card, message } from 'antd';
+import { MailOutlined } from '@ant-design/icons';
 
-import { Breadcrumb, Layout, Menu, theme , Card} from 'antd';
-import Home from '../pages/Home';
-import MyLikes from '../pages/MyLikes';
-import MyPosts from '../pages/MyPosts';
-import MyBookmarks from '../pages/MyBookmarks';
+import { Layout, Menu, theme } from 'antd';
 
 const { Header, Content, Footer, Sider } = Layout;
 
-// Function to create menu items
 function getItem(label, key, icon, children) {
   return {
     key,
@@ -28,7 +23,6 @@ function getItem(label, key, icon, children) {
   };
 }
 
-// Array of menu items
 const items = [
   getItem('Home', 'home', <HomeOutlined />),
   getItem('Bookmarks', 'my-bookmarks', <BookOutlined />),
@@ -38,17 +32,24 @@ const items = [
 ];
 
 const MyProfile = () => {
-  
   const navigate = useNavigate();
-  const [editableMobile, setEditableMobile] = useState(false);
+  const [editableEmail, setEditableEmail] = useState(false);
+  const [userData, setUserData] = useState({});
+  const [newEmail, setNewEmail] = useState(''); // State to store the new email input
+
 
   const [collapsed, setCollapsed] = useState(true);
-  const toggleEditableMobile = () => {
-    setEditableMobile(!editableMobile);
+
+  const toggleEditableEmail = () => {
+    if (!editableEmail) {
+      // Set newEmail to the current user's email when entering edit mode
+      setNewEmail(userData.email || '');
+    }
+    setEditableEmail(!editableEmail);
   };
-  
+
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { colorBgContainer },
   } = theme.useToken();
 
   useEffect(() => {
@@ -62,34 +63,88 @@ const MyProfile = () => {
 
     window.addEventListener('resize', handleResize);
     handleResize();
-    const userToken = localStorage.getItem('token');
-    if (!userToken) {
-      // Redirect to sign-in page if token is not present
-      navigate('/signin');
-    }
+
+    const fetchUserDetails = async () => {
+      try {
+        const userToken = localStorage.getItem('token');
+        if (!userToken) {
+          navigate('/signin');
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/suser/getmyprofile', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${userToken}`,
+          },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setUserData(userData);
+        } else {
+          console.error('Failed to fetch user details');
+        }
+      } catch (error) {
+        console.error(error);
+        message.error('Internal Server Error');
+      }
+    };
+
+    fetchUserDetails();
+
     return () => {
       window.removeEventListener('resize', handleResize);
     };
   }, [navigate]);
 
-  // Handle menu item click
   const handleMenuClick = (item) => {
     const { key } = item;
     navigate(`/${key}`);
   };
 
-  // Handle Home button click 
   const handleHomeClick = () => {
-    navigate('/home'); // Redirect to the home page
+    navigate('/home');
   };
-  const handleLikeClick = () => {
-    navigate('/my-likes'); // Redirect to the home page
+
+  const handleUpdateEmail = async () => {
+    try {
+      const userToken = localStorage.getItem('token');
+      if (!userToken) {
+        navigate('/signin');
+        return;
+      }
+  
+      const response = await fetch('http://localhost:5000/suser/updateprofile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({ newEmail }), // Ensure newEmail is correctly set
+      });
+  
+      if (response.ok) {
+        const updatedUserData = await response.json();
+        setUserData(updatedUserData.updatedUser);
+        setEditableEmail(false);
+        message.success('Email updated successfully');
+        window.location.reload(); // Refresh the page
+      } else {
+        console.error('Failed to update email');
+        message.error('Failed to update email. Please try again.');
+      }
+    } catch (error) {
+      console.error(error);
+      message.error('Internal Server Error');
+    }
   };
-  const handleBookmarkClick = () => {
-    navigate('/my-bookmarks'); // Redirect to the home page
-  };
-  const handlePostClick = () => {
-    navigate('/my-posts'); // Redirect to the home page
+  
+  
+  
+
+  const handleEmailChange = (e) => {
+    setNewEmail(e.target.value);
   };
 
   return (
@@ -117,17 +172,6 @@ const MyProfile = () => {
           <Menu.Item key="home" icon={<HomeOutlined />} onClick={handleHomeClick}>
             Home
           </Menu.Item>
-          <Menu.Item key="my-likes" icon={<LikeOutlined />} onClick={handleLikeClick}>
-            MyLikes
-          </Menu.Item>
-          <Menu.Item key="my-bookmarks" icon={<LikeOutlined />} onClick={handleBookmarkClick}>
-            MyBookmarks
-          </Menu.Item>
-          <Menu.Item key="my-posts" icon={<LikeOutlined />} onClick={handlePostClick}>
-            MyBookmarks
-          </Menu.Item>
-
-          {/* Other menu items... */}
         </Menu>
       </Sider>
       <Layout>
@@ -148,24 +192,30 @@ const MyProfile = () => {
           <Card>
             <div style={{ textAlign: 'center', marginBottom: 20 }}>
               <Avatar size={64} icon={<UserOutlined />} />
-              <div style={{ marginTop: 10, fontSize: 18 }}>User Name</div>
+              <div style={{ marginTop: 10, fontSize: 18 }}>{userData.username}</div>
             </div>
 
             <Form labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
-              <Form.Item label="Email" colon={false}>
-                <Input prefix={<MailOutlined />} value="user@example.com" disabled />
+              <Form.Item label="Name" colon={false}>
+                <Input prefix={<UserOutlined />} value={userData.name} disabled />
               </Form.Item>
 
-              <Form.Item label="Mobile" colon={false}>
+              <Form.Item label="Email" type='email' colon={false}>
                 <Input
-                  prefix={<PhoneOutlined />}
-                  value="123-456-7890"
-                  disabled={!editableMobile}
-                  onChange={(e) => console.log(e.target.value)}
+                  prefix={<MailOutlined />}
+                  type='email'
+                  value={editableEmail ? newEmail : userData.email}
+                  disabled={!editableEmail}
+                  onChange={handleEmailChange}
                 />
-                <Button type="link" onClick={toggleEditableMobile}>
-                  {editableMobile ? 'Save' : 'Edit'}
+                <Button type="link" onClick={toggleEditableEmail}>
+                  {editableEmail ? 'Cancel' : 'Edit'}
                 </Button>
+                {editableEmail && (
+                  <Button type="primary" style={{marginTop:'2px'}} onClick={handleUpdateEmail}>
+                    Save
+                  </Button>
+                )}
               </Form.Item>
             </Form>
           </Card>

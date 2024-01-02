@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import {
   HomeOutlined,
@@ -35,13 +36,14 @@ function getItem(label, key, icon, children) {
 
 const items = [
   getItem('Home', 'home', <HomeOutlined />),
-  getItem('Bookmarks', '2', <BookOutlined />),
+  getItem('Bookmarks', 'my-bookmarks', <BookOutlined />),
   getItem('Likes', 'my-likes', <LikeOutlined />),
-  getItem('Posts', 'sub2', <ProfileOutlined />),
-  getItem('User', '9', <UserOutlined />),
+  getItem('Posts', 'my-posts', <ProfileOutlined />),
+  getItem('User', 'my-profile', <UserOutlined />),
 ];
 
 const MyLikes = () => {
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(true);
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -249,6 +251,26 @@ const fetchPosts = async (page) => {
   const handleCommentChange = (e) => {
     setNewComment(e.target.value);
   };
+  const handleMenuClick = (item) => {
+    const { key } = item;
+    navigate(`/${key}`);
+  };
+  const handleHomeClick = () => {
+    navigate('/home'); // Redirect to the home page
+  };
+  const handleLikeClick = () => {
+    navigate('/my-likes'); // Redirect to the home page
+  };
+  const handleBookmarkClick = () => {
+    navigate('/my-bookmarks'); // Redirect to the home page
+  };
+  const handlePostClick = () => {
+    navigate('/my-posts'); // Redirect to the home page
+  };
+
+  const handleProfileClick = () => {
+    navigate('/my-profile'); // Redirect to the home page
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -271,7 +293,30 @@ const fetchPosts = async (page) => {
         }}
       >
         <div className="demo-logo-vertical" />
-        <Menu theme="dark" defaultSelectedKeys={['my-likes']} mode="inline" items={items} />
+        <Menu
+          theme="dark"
+          defaultSelectedKeys={['my-likes']}
+          mode="inline"
+          items={items}
+          onClick={handleMenuClick}
+        >
+          <Menu.Item key="home" icon={<HomeOutlined />} onClick={handleHomeClick}>
+            Home
+          </Menu.Item>
+          <Menu.Item key="my-likes" icon={<LikeOutlined />} onClick={handleLikeClick}>
+            MyLikes
+          </Menu.Item>
+          <Menu.Item key="my-bookmarks" icon={<LikeOutlined />} onClick={handleBookmarkClick}>
+            MyBookmarks
+          </Menu.Item>
+          <Menu.Item key="my-posts" icon={<LikeOutlined />} onClick={handlePostClick}>
+            MyBookmarks
+          </Menu.Item>
+          <Menu.Item key="my-profile" icon={<LikeOutlined />} onClick={handleProfileClick}>
+            MyProfile
+          </Menu.Item>
+          
+        </Menu>
       </Sider>
       <Layout style={{ marginLeft: collapsed ? 80 : 200 }}>
         <Header

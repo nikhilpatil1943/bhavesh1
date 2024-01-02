@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Layout,
   Menu,
@@ -10,8 +11,7 @@ import {
   Tooltip,
   List,
   Form,
-  Table,
-  Space,
+  
   Drawer,
 } from 'antd';
 import {
@@ -23,7 +23,7 @@ import {
   LikeTwoTone,
   BookTwoTone,
 } from '@ant-design/icons';
-import Comment from '@ant-design/compatible/lib/comment';
+
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Meta } = Card;
@@ -38,14 +38,17 @@ function getItem(label, key, icon, children) {
 }
 
 const items = [
-  getItem('Home', '1', <HomeOutlined />),
-  getItem('Bookmarks', '2', <BookOutlined />),
-  getItem('Likes', 'sub1', <LikeOutlined />),
-  getItem('Posts', 'sub2', <ProfileOutlined />),
-  getItem('User', '9', <UserOutlined />),
+  getItem('Home', 'home', <HomeOutlined />),
+  getItem('Bookmarks', 'my-bookmarks', <BookOutlined />),
+  getItem('Likes', 'my-likes', <LikeOutlined />),
+  getItem('Posts', 'my-posts', <ProfileOutlined />),
+  getItem('User', 'my-profile', <UserOutlined />),
 ];
 
 const MyPosts = () => {
+  const [editingPostId, setEditingPostId] = useState(null);
+
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(window.innerWidth < 450);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const {
@@ -53,16 +56,28 @@ const MyPosts = () => {
   } = theme.useToken();
 
   useEffect(() => {
-    const handleResize = () => {
-      setCollapsed(window.innerWidth < 450);
+    // Fetch previous posts when the component mounts
+    const fetchPreviousPosts = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        // Make a request to the API
+        const response = await fetch('http://localhost:5000/suser/getmypost',{
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+console.log(data)
+        // Assuming the response has a "posts" property
+        setPosts(data.myPosts); // Update the state with the fetched posts
+      } catch (error) {
+        console.error('Error fetching previous posts:', error);
+      }
     };
 
-    window.addEventListener('resize', handleResize);
-    handleResize();
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+    fetchPreviousPosts();
   }, []);
 
   const [posts, setPosts] = useState([
@@ -110,146 +125,188 @@ const MyPosts = () => {
     );
   };
 
-  const toggleComments = (postId) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId ? { ...post, showComments: !post.showComments } : post
-      )
-    );
+  
+
+  const handleEditPost = async (postId, newContent) => {
+    try {
+      const token = localStorage.getItem('token');
+
+      // Make a request to the API to update the post
+      const response = await fetch('http://localhost:5000/suser/updatepost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          _id: postId,
+          body: newContent,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update the state with the edited post
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId ? { ...post, content: newContent, isEditing: false } : post
+          )
+        );
+        setEditingPostId(null); // Reset editingPostId after editing is complete
+      } else {
+        console.error('Error updating post:', data.message);
+        // Handle error if needed
+      }
+    } catch (error) {
+      console.error('Error updating post:', error);
+      // Handle error if needed
+    }
   };
 
-  const handleEditPost = (postId, newContent) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId ? { ...post, content: newContent, isEditing: false } : post
-      )
-    );
+
+  const handleDeletePost = async (postId) => {
+    try {
+      const token = localStorage.getItem('token');
+
+      // Make a request to the API to delete the post
+      const response = await fetch('http://localhost:5000/suser/deletePost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id: postId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update the state by filtering out the deleted post
+        setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+        window.location.reload();
+      } else {
+        console.error('Error deleting post:', data.message);
+        // Handle error if needed
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      // Handle error if needed
+    }
   };
 
-  const handleDeletePost = (postId) => {
-    setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+
+
+
+ 
+
+  
+
+  const handleMenuClick = (item) => {
+    const { key } = item;
+    navigate(`/${key}`);
+  };
+  const handleHomeClick = () => {
+    navigate('/home'); // Redirect to the home page
+  };
+  const handleLikeClick = () => {
+    navigate('/my-likes'); // Redirect to the home page
+  };
+  const handleBookmarkClick = () => {
+    navigate('/my-bookmarks'); // Redirect to the home page
+  };
+  const handlePostClick = () => {
+    navigate('/my-posts'); // Redirect to the home page
   };
 
-  const expandedRowRender = (record) => (
-    <List
-      dataSource={record.comments}
-      renderItem={(comment) => (
-        <Comment key={comment.id} author={comment.author} content={comment.content} />
-      )}
-    />
-  );
+  const handleProfileClick = () => {
+    navigate('/my-profile'); // Redirect to the home page
+  };
 
-  const columns = [
-    {
-      title: 'Owner',
-      dataIndex: 'owner',
-      key: 'owner',
-      render: (owner) => (
-        <Space size="middle">
-          <Avatar src={owner.photo} />
-          {owner.name}
-        </Space>
-      ),
-    },
-    {
-      title: 'Date',
-      dataIndex: 'date',
-      key: 'date',
-    },
-    {
-      title: 'Content',
-      dataIndex: 'content',
-      key: 'content',
-      render: (text, record) => (
-        record.isEditing ? (
-          <Form
-            name={`editPostForm-${record.id}`}
-            initialValues={{ content: record.content }}
-            onFinish={(values) => handleEditPost(record.id, values.content)}
-          >
-            <Form.Item
-              noStyle
-              name="content"
-              rules={[{ required: true, message: 'Content is required' }]}
-            >
-              <Input.TextArea rows={2} placeholder="Edit your post..." style={{ width: '100%' }} />
-            </Form.Item>
-            <Button key="edit" type="primary" htmlType="submit" style={{ width: '100%', marginTop: '2px' }}>
-              Save
-            </Button>
-          </Form>
-        ) : (
-          text
-        )
-      ),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (text, record) => (
-        <Space size="middle">
-          <Tooltip title="Like">
-            <Button
-              icon={<LikeTwoTone />}
-              onClick={() => handleLike(record.id)}
-            >
-              {record.likes}
-            </Button>
-          </Tooltip>
-          <Tooltip title="Bookmark">
-            <Button
-              icon={<BookTwoTone />}
-              onClick={() => handleBookmark(record.id)}
-            >
-              {record.bookmarks}
-            </Button>
-          </Tooltip>
-          <Button
-            key="edit"
-            type="primary"
-            onClick={() => setPosts((prevPosts) =>
-              prevPosts.map((post) =>
-                post.id === record.id ? { ...post, isEditing: !post.isEditing } : post
-              )
-            )}
-          >
-            Edit
-          </Button>
-          <Button
-            key="delete"
-            type="danger"
-            onClick={() => handleDeletePost(record.id)}
-          >
-            Delete
-          </Button>
-        </Space>
-      ),
-    },
-  ];
+  const isSmallScreen = window.innerWidth < 500;
 
-  const responsiveColumns = columns.map((col) => ({
-    ...col,
-    responsive: ['xs', 'sm'],
-  }));
-
-  const tableContent = (
+  const cardContent = (
     <>
-      <Table
-        columns={responsiveColumns}
+      <List
+        itemLayout="vertical"
+        size="large"
         dataSource={posts}
-        expandable={{ expandedRowRender, rowExpandable: (record) => record.comments && record.comments.length > 0 }}
+        renderItem={(post) => (
+          <Card
+            key={post.id}
+            style={{ marginBottom: 16 }}
+            actions={[
+              <Tooltip key="like" title="Like">
+                <Button icon={<LikeTwoTone />} onClick={() => handleLike(post.id)}>
+                  {post.likes.length}
+                </Button>
+              </Tooltip>,
+              <Tooltip key="bookmark" title="Bookmark">
+                <Button icon={<BookTwoTone />} onClick={() => handleBookmark(post.id)}>
+                  {}
+                </Button>
+              </Tooltip>,
+               <Button
+               key="edit"
+               type="primary"
+               onClick={() => setEditingPostId(post.id)}
+               disabled={editingPostId !== null}
+             >
+               Edit
+             </Button>,
+            
+      
+              <Button key="delete" type="danger" onClick={() => handleDeletePost(post._id)}>
+                Delete
+              </Button>,
+            ]}
+          >
+             <Meta
+                avatar={<Avatar src={'https://img.freepik.com/free-photo/blue-wall-background_53876-88663.jpg'} />}
+                title={post.heading}
+                description={post.body}
+              />
+              {editingPostId === post.id ? (
+                <Form
+                  name={`editPostForm-${post.id}`}
+                  initialValues={{ content: post.content }}
+                  onFinish={(values) => handleEditPost(post._id, values.content)}
+                >
+                  <Form.Item
+                    noStyle
+                    name="content"
+                    rules={[{ required: true, message: 'Content is required' }]}
+                  >
+                    <Input.TextArea rows={2} placeholder="Edit your post..." style={{ width: '100%' }} />
+                  </Form.Item>
+                  <Button
+                    key="edit"
+                    type="primary"
+                    htmlType="submit"
+                    style={{ width: '100%', marginTop: '2px' }}
+                  >
+                    Save
+                  </Button>
+                </Form>
+              ) : (
+                <p>{post.content}</p>
+              )}
+            </Card>
+        )}
       />
       <Card
         size="small"
         style={{ marginBottom: '16px' }}
         actions={[
           <Tooltip key="like" title="Like">
-            <Button icon={<LikeTwoTone />} disabled />
-            <span style={{ paddingLeft: 8 }}>0</span>
+            <Button icon={<LikeTwoTone />} disabled>
+              0
+            </Button>
           </Tooltip>,
           <Tooltip key="bookmark" title="Bookmark">
-            <Button icon={<BookTwoTone />} disabled />
-            <span style={{ paddingLeft: 8 }}>0</span>
+            <Button icon={<BookTwoTone />} disabled>
+              0
+            </Button>
           </Tooltip>,
         ]}
       >
@@ -262,23 +319,7 @@ const MyPosts = () => {
           name="newPostForm"
           initialValues={{ content: '' }}
           onFinish={(values) => {
-            setPosts((prevPosts) => [
-              {
-                id: prevPosts.length + 1,
-                owner: {
-                  name: 'Your Name',
-                  photo: 'https://xsgames.co/randomusers/avatar.php?g=pixel&key=new',
-                },
-                date: 'Just now',
-                content: values.content,
-                likes: 0,
-                bookmarks: 0,
-                comments: [],
-                showComments: false,
-                isEditing: false,
-              },
-              ...prevPosts,
-            ]);
+            setPosts(/* ... */);
           }}
         >
           <Form.Item
@@ -310,18 +351,41 @@ const MyPosts = () => {
         zeroWidthTriggerStyle={{ top: 64 }}
       >
         <div className="demo-logo-vertical" />
-        {window.innerWidth < 450 ? (
+        {isSmallScreen && (
           <Drawer
             placement="left"
             closable={false}
             onClose={() => setDrawerVisible(false)}
             visible={drawerVisible}
           >
-            <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items} />
-          </Drawer>
+            <Menu theme="dark" defaultSelectedKeys={['my-posts']} mode="inline" items={items} />
+          </Drawer>)}
         ) : (
-          <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items} />
-        )}
+          <Menu
+          theme="dark"
+          defaultSelectedKeys={['my-posts']}
+          mode="inline"
+          items={items}
+          onClick={handleMenuClick}
+        >
+          <Menu.Item key="home" icon={<HomeOutlined />} onClick={handleHomeClick}>
+            Home
+          </Menu.Item>
+          <Menu.Item key="my-likes" icon={<LikeOutlined />} onClick={handleLikeClick}>
+            MyLikes
+          </Menu.Item>
+          <Menu.Item key="my-bookmarks" icon={<LikeOutlined />} onClick={handleBookmarkClick}>
+            MyBookmarks
+          </Menu.Item>
+          <Menu.Item key="my-posts" icon={<LikeOutlined />} onClick={handlePostClick}>
+            MyBookmarks
+          </Menu.Item>
+          <Menu.Item key="my-profile" icon={<LikeOutlined />} onClick={handleProfileClick}>
+            MyProfile
+          </Menu.Item>
+          
+        </Menu>
+        )
       </Sider>
       <Layout>
         <Header
@@ -338,16 +402,8 @@ const MyPosts = () => {
           Algo_Bulls{' '}
         </Header>
         <Content style={{ margin: '0 16px' }}>
-          {window.innerWidth < 450 ? (
-            <Button
-              type="primary"
-              onClick={() => setDrawerVisible(true)}
-              style={{ marginBottom: '16px' }}
-            >
-              Open Menu
-            </Button>
-          ) : null}
-          {tableContent}
+          
+          { cardContent }
         </Content>
         <Footer style={{ textAlign: 'center' }}>
           Ant Design ©2023 Created by Ant UED

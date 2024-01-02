@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import {
   HomeOutlined,
@@ -34,14 +35,15 @@ function getItem(label, key, icon, children) {
 }
 
 const items = [
-  getItem('Home', '1', <HomeOutlined />),
-  getItem('Bookmarks', '2', <BookOutlined />),
-  getItem('Likes', 'sub1', <LikeOutlined />),
-  getItem('Posts', 'sub2', <ProfileOutlined />),
-  getItem('User', '9', <UserOutlined />),
+  getItem('Home', 'home', <HomeOutlined />),
+  getItem('Bookmarks', 'my-bookmarks', <BookOutlined />),
+  getItem('Likes', 'my-likes', <LikeOutlined />),
+  getItem('Posts', 'my-posts', <ProfileOutlined />),
+  getItem('User', 'my-profile', <UserOutlined />),
 ];
 
-const Home = () => {
+const MyBookmarks = () => {
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(true);
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -207,7 +209,7 @@ const fetchPosts = async (page) => {
   try {
     const token = localStorage.getItem('token');
 
-    const response = await fetch(`http://localhost:5000/suser/getmylikedpost`,{
+    const response = await fetch(`http://localhost:5000/suser/getmybookmarks`,{
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -249,6 +251,26 @@ const fetchPosts = async (page) => {
   const handleCommentChange = (e) => {
     setNewComment(e.target.value);
   };
+  const handleMenuClick = (item) => {
+    const { key } = item;
+    navigate(`/${key}`);
+  };
+  const handleHomeClick = () => {
+    navigate('/home'); // Redirect to the home page
+  };
+  const handleLikeClick = () => {
+    navigate('/my-likes'); // Redirect to the home page
+  };
+  const handleBookmarkClick = () => {
+    navigate('/my-bookmarks'); // Redirect to the home page
+  };
+  const handlePostClick = () => {
+    navigate('/my-posts'); // Redirect to the home page
+  };
+
+  const handleProfileClick = () => {
+    navigate('/my-profile'); // Redirect to the home page
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -271,7 +293,30 @@ const fetchPosts = async (page) => {
         }}
       >
         <div className="demo-logo-vertical" />
-        <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items} />
+        <Menu
+          theme="dark"
+          defaultSelectedKeys={['my-bookmarks']}
+          mode="inline"
+          items={items}
+          onClick={handleMenuClick}
+        >
+          <Menu.Item key="home" icon={<HomeOutlined />} onClick={handleHomeClick}>
+            Home
+          </Menu.Item>
+          <Menu.Item key="my-likes" icon={<LikeOutlined />} onClick={handleLikeClick}>
+            MyLikes
+          </Menu.Item>
+          <Menu.Item key="my-bookmarks" icon={<LikeOutlined />} onClick={handleBookmarkClick}>
+            MyBookmarks
+          </Menu.Item>
+          <Menu.Item key="my-posts" icon={<LikeOutlined />} onClick={handlePostClick}>
+            MyBookmarks
+          </Menu.Item>
+          <Menu.Item key="my-profile" icon={<LikeOutlined />} onClick={handleProfileClick}>
+            MyProfile
+          </Menu.Item>
+          
+        </Menu>
       </Sider>
       <Layout style={{ marginLeft: collapsed ? 80 : 200 }}>
         <Header
@@ -303,7 +348,7 @@ const fetchPosts = async (page) => {
                 </Tooltip>,
                 <Tooltip key="bookmark" title="Bookmark">
                   <BookTwoTone />
-                  <span style={{ paddingLeft: 8 }}>{post.bookmarks}</span>
+                  <span style={{ paddingLeft: 8 }}>{}</span>
                 </Tooltip>,
                 <Tooltip
                   key="comment"
@@ -374,4 +419,4 @@ const fetchPosts = async (page) => {
   );
 };
 
-export default Home;
+export default MyBookmarks;
